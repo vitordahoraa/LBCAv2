@@ -1,0 +1,19 @@
+{
+  "name": "helpinho",
+  "version": "1.0.0",
+  "description": "Projeto para vaga fullstack",
+  "main": "index.js",
+  "scripts": {
+    "test": "dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitordahoraa/LBCATest.git"
+  },
+  "author": "Vitor Murilo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitordahoraa/LBCATest/issues"
+  },
+  "homepage": "https://github.com/vitordahoraa/LBCATest#readme"
+}
