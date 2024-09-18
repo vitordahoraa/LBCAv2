@@ -1,0 +1,14 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend project for LBCA",
+  "main": "main.ts",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Vitor Murilo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

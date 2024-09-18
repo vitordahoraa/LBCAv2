@@ -4,7 +4,10 @@
   "description": "Projeto para vaga fullstack",
   "main": "index.js",
   "scripts": {
-    "test": "dev"
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd frontend && ng serve",
+    "start:backend": "cd backend && node main",
+    "postinstall": "(cd frontend && npm install)"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,11 @@
   "bugs": {
     "url": "https://github.com/vitordahoraa/LBCATest/issues"
   },
-  "homepage": "https://github.com/vitordahoraa/LBCATest#readme"
+  "homepage": "https://github.com/vitordahoraa/LBCATest#readme",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
 }
