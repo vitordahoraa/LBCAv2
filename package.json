@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "cd frontend && ng serve",
-    "start:backend": "cd backend && node main",
+    "start:backend": "cd backend && nest start",
     "postinstall": "(cd frontend && npm install)"
   },
   "repository": {
@@ -23,6 +23,7 @@
     "concurrently": "^9.0.1"
   },
   "dependencies": {
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "nest": "^0.1.6"
   }
 }

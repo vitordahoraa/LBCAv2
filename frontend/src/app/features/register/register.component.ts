@@ -4,10 +4,11 @@ declare global {
   }
 }
 
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import {FormControl, FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common'
-import { RouterLink } from '@angular/router';
+import { Router,RouterLink } from '@angular/router';
+import { UserService } from '../../shared/services/user/user.service';
 
 
 @Component({
@@ -18,6 +19,15 @@ import { RouterLink } from '@angular/router';
   styleUrl: './register.component.scss'
 })
 export class RegisterComponent implements OnInit{
+
+  constructor(
+    private _userService: UserService,
+    private router: Router,
+    private ngzone : NgZone
+  ) { 
+
+  }
+
   ngOnInit(): void {
     this.loadGoogleScript();
     /*google.accounts.id.initialize({
@@ -30,8 +40,17 @@ export class RegisterComponent implements OnInit{
     google.accounts.id.renderButton(document.getElementById('google-btn'))*/
     
 }
-  onSignIn(){
-    //TODO
+  onSignIn(res : any){
+    this._userService.auth(res.credential).subscribe(
+      res => {
+        this.ngzone.run( ()=>this.router.navigate(['/home'])) 
+    },
+      (err) => {
+        window.alert('Erro ao logar via Google')
+        console.log(err)
+        return false;
+  })
+    
   }
 
    loadGoogleScript() {
@@ -45,7 +64,7 @@ export class RegisterComponent implements OnInit{
   applyForm = new FormGroup({
     name : new FormControl(''),
     email : new FormControl(''),
-    cpf : new FormControl(''),
+    telefone : new FormControl(''),
     data_nascimento : new FormControl(''),
     senha : new FormControl(''),
   })

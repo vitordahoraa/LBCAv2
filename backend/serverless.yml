@@ -1,0 +1,128 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: pessoalvitordahoraa
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: lbca
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: backend
+
+stages:
+  default:
+    params:
+      userTableName: "users-table-${sls:stage}"
+      helpRequestTableName: "help-request-table-${sls:stage}"
+      helpDoneTableName: "help-done-table-${sls:stage}"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [UsersTable, Arn]
+            - Fn::GetAtt: [HelpRequest, Arn]
+            - Fn::GetAtt: [HelpDone, Arn]
+  environment:
+    USERS_TABLE: ${param:userTableName}
+    HELP_REQUEST_TABLE: ${param:helpRequestTableName}
+    HELP_DONE_TABLE: ${param:helpDoneTableName}
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - http: 
+          path: "users/{userId}"
+          method : GET
+          cors: true
+
+      - http: 
+          path: "users"
+          method : POST
+          cors: true
+
+      - http: 
+          path: "google/users"
+          method : POST
+          cors: true
+          
+      - http: 
+          path: "helprequest/{helpId}"
+          method : GET
+          cors: true
+          
+      - http: 
+          path: "helprequest"
+          method : POST
+          cors: true
+          
+      - http: 
+          path: "helprequest/filter/titulo/{titulo}"
+          method : GET
+          cors: true
+          
+      - http: 
+          path: "helpdone/{helpId}"
+          method : GET
+          cors: true
+          
+      - http: 
+          path: "helpdone"
+          method : POST
+          cors: true
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${param:userTableName}
+
+    HelpRequest:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            AttributeDefinitions:
+              - AttributeName: helpId
+                AttributeType: S
+              - AttributeName: titulo
+                AttributeType: S
+            KeySchema:
+              - AttributeName: helpId
+                KeyType: HASH
+            GlobalSecondaryIndexes: 
+              - IndexName: titulo-index
+                KeySchema: 
+                - AttributeName: titulo
+                  KeyType: HASH
+                Projection : 
+                  ProjectionType : ALL
+            BillingMode: PAY_PER_REQUEST
+
+            
+            TableName: ${param:helpRequestTableName}
+    HelpDone:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            AttributeDefinitions:
+              - AttributeName: helpId
+                AttributeType: S
+            KeySchema:
+              - AttributeName: helpId
+                KeyType: HASH
+            BillingMode: PAY_PER_REQUEST
+            TableName: ${param:helpDoneTableName}
