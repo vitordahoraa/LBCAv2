@@ -34,11 +34,20 @@ export class ItemCardComponent{
       const valor = window.prompt('Quanto voce deseja doar?')
       if(valor){
         this.helpRequest.createDonation({
-          helpId : Math.random() * 10000, 
+          helpId : String(Math.random() * 10000), 
           helpRequestId : this.helpRequestId, 
           valor : valor, 
           doador : this.CurrentUser()
-        })
+        }).subscribe({
+          next : res => {
+            window.alert('Doação realizada com sucesso')
+        },
+        error : err => {
+            window.alert('Erro ao realizar doação')
+            console.log(err)
+            return false;
+        }
+      })
 
       }
     }
