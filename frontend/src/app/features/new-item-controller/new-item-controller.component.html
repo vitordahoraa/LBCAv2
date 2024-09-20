@@ -1,0 +1,41 @@
+@if(currentScreen==1){
+    <app-new-item 
+        (categoryEmitter)="categoryEvent($event)" 
+        (nextScreen)="incrementScreen()"
+        [categoryState] = "category"
+    ></app-new-item>
+} @else if(currentScreen==2){
+    <app-new-item2 
+        (returnScreen)="decrementScreen()" 
+        (nextScreen)="incrementScreen()"
+        (fileEmitter)="fileEvent($event)"
+        (titleEmitter)="titleEvent($event)"
+        (helpRequestId)="helpRequestIdEvent($event)"
+        (descriptionEmitter)="descriptionEvent($event)"
+        [titleState]="title"
+        [descriptionState]="description"
+        [fileState]="file"
+    ></app-new-item2>   
+} @else if(currentScreen==3){
+    <app-new-item3
+        (returnScreen)="decrementScreen()" 
+        (nextScreen)="incrementScreen()"
+        (targetEmitter) = "targetEvent($event)"
+        [targetState] = "target"
+    
+    ></app-new-item3>   
+} @else if(currentScreen==4){
+    <app-new-item4
+    (returnScreen)="decrementScreen()" 
+    [titulo]="title" 
+    [descricao] = "description" 
+    [meta] = "target" 
+    [categoria] = 'category' 
+    [imagem] = "imagem"
+    [autor] = "autor"
+    [userId] = 'userId'
+    [helpId] = 'helpRequestId'
+    ></app-new-item4>   
+} @else {
+    <div>Something Went Wrong!</div>
+}

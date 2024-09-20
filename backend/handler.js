@@ -4,6 +4,7 @@ const {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  ScanCommand
 } = require("@aws-sdk/lib-dynamodb");
 
 
@@ -17,6 +18,7 @@ const HELP_REQUEST_TABLE = process.env.HELP_REQUEST_TABLE;
 const HELP_DONE_TABLE = process.env.HELP_DONE_TABLE;
 const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
+
 
 function decodeJWT(token) {
   const base64UrlDecode = (str) => {
@@ -58,21 +60,22 @@ app.get("/users/:userId", async (req, res) => {
     const command = new GetCommand(params);
     const { Item } = await docClient.send(command);
     if (Item) {
-      const { userId, name , telefone, email} = Item;
-      res.json({ userId, name , telefone, email });
+      const { userId, name , telefone, email, data_nascimento, senha64} = Item;
+      res.header({'Access-Control-Allow-Origin' : '*'}).json({ userId, name , telefone, email, data_nascimento, senha64 });
     } else {
       res
+        .header({'Access-Control-Allow-Origin' : '*'})
         .status(404)
         .json({ error: 'Could not find user with provided "userId"' });
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Could not retrieve user" });
+    res.header({'Access-Control-Allow-Origin' : '*'}).status(500).json({ error: "Could not retrieve user" });
   }
 });
 
 app.post("/users", async (req, res) => {
-  const { userId, name, telefone, email } = req.body;
+  const { userId, name, telefone, email, data_nascimento, senha } = req.body;
   if (typeof userId !== "string") {
     res.status(400).json({ error: '"userId" must be a string' });
   } else if (typeof name !== "string") {
@@ -81,17 +84,22 @@ app.post("/users", async (req, res) => {
     res.status(400).json({ error: '"telefone" must be a string' });
   } else if (typeof email !== "string") {
     res.status(400).json({ error: '"email" must be a string' });
+  }else if (typeof data_nascimento !== "string") {
+    res.status(400).json({ error: '"data_nascimento" must be a string' });
+  }else if (typeof senha !== "string") {
+    res.status(400).json({ error: '"senha" must be a string' });
   }
-
+  const senha64 = btoa(senha)
   const params = {
     TableName: USERS_TABLE,
-    Item: { userId, name , telefone, email},
+    Item: { userId, name , telefone, email,data_nascimento,senha64},
   };
+  console.log(params)
 
   try {
     const command = new PutCommand(params);
     await docClient.send(command);
-    res.json({ userId, name , telefone, email});
+    res.header({'Access-Control-Allow-Origin' : '*'}).json({ userId, name , telefone, email,data_nascimento});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not create user" });
@@ -123,26 +131,9 @@ app.post("/google/users", async (req, res) => {
     res.header({'Access-Control-Allow-Origin' : '*'}).json({ userId, name , picture, email});
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Could not create user" });
+    res.header({'Access-Control-Allow-Origin' : '*'}).status(500).json({ error: "Could not create user" });
   }
 
-
-  
-/*
-  const params = {
-    TableName: USERS_TABLE,
-    Item: { userId, name , telefone, email},
-  };
-
-  try {
-    const command = new PutCommand(params);
-    await docClient.send(command);
-    res.json({ userId, name , telefone, email});
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Could not create user" });
-  }
-    */
 });
 
 
@@ -161,8 +152,30 @@ app.get("/helprequest/:helpId", async (req, res) => {
     const command = new GetCommand(params);
     const { Item } = await docClient.send(command);
     if (Item) {
-      const { helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem  } = Item;
-      res.json({ helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem  });
+      const { helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia  } = Item;
+      res.header({'Access-Control-Allow-Origin' : '*'}).json({ helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia  });
+    } else {
+      res
+        .status(404)
+        .json({ error: 'Could not find user with provided "helpId"' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Could not retrieve user" });
+  }
+});
+
+
+app.get("/helprequest", async (req, res) => {
+  const params = {
+    TableName: HELP_REQUEST_TABLE
+  };
+
+  try {
+    const command = new ScanCommand(params);
+    const {Items} = await docClient.send(command);
+    if (Items) {
+      res.header({'Access-Control-Allow-Origin' : '*'}).json(Items);
     } else {
       res
         .status(404)
@@ -175,11 +188,10 @@ app.get("/helprequest/:helpId", async (req, res) => {
 });
 
 app.post("/helprequest", async (req, res) => {
-  const { helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem  } = req.body;
-  if (typeof userId !== "string") {
+  console.log(req)
+  const { helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia  } = req.body;
+  if (typeof helpId !== "string") {
     res.status(400).json({ error: '"helpId" must be a string' });
-  } else if (typeof name !== "string") {
-    res.status(400).json({ error: '"name" must be a string' });
   } else if (typeof meta !== "string") {
     res.status(400).json({ error: '"meta" must be a string' });
   } else if (typeof descricao !== "string") {
@@ -188,20 +200,28 @@ app.post("/helprequest", async (req, res) => {
     res.status(400).json({ error: '"titulo" must be a string' });
   } else if (typeof solicitante !== "string") {
     res.status(400).json({ error: '"solicitante" must be a string' });
+  } else if (typeof categoria !== "string") {
+    res.status(400).json({ error: '"categoria" must be a string' });
+  } else if (typeof prazo !== "string") {
+    res.status(400).json({ error: '"prazo" must be a string' });
+  } else if (typeof conta !== "string") {
+    res.status(400).json({ error: '"conta" must be a string' });
+  } else if (typeof agencia !== "string") {
+    res.status(400).json({ error: '"agencia" must be a string' });
   }
 
   const params = {
     TableName: HELP_REQUEST_TABLE,
-    Item: { helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem},
+    Item: { helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia},
   };
 
   try {
     const command = new PutCommand(params);
     await docClient.send(command);
-    res.json({ userId, name });
+    res.header({'Access-Control-Allow-Origin' : '*'}).json({ helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Could not create help request" });
+    res.header({'Access-Control-Allow-Origin' : '*'}).status(500).json({ error: "Could not create help request" });
   }
 });
 
@@ -218,11 +238,11 @@ app.get("/helprequest/filter/titulo/:titulo", async (req, res) => {
   };
 
   try {
-    const command = new GetCommand(params);
-    const { Item } = await docClient.send(command);
-    if (Item) {
-      const { helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem  } = Item;
-      res.json({ helpId, name, meta, descricao, titulo, solicitante, categoria, prazo, imagem  });
+    const command = new ScanCommand(params);
+    const { Items } = await docClient.send(command);
+    if (Items) {
+      //const { helpId, meta, descricao, titulo, solicitante, categoria, prazo, imagem, conta, agencia } = Item;
+      res.header({'Access-Control-Allow-Origin' : '*'}).json(Items);
     } else {
       res
         .status(404)
@@ -251,7 +271,7 @@ app.get("/helpdone/:helpId", async (req, res) => {
     const { Item } = await docClient.send(command);
     if (Item) {
       const { helpId, helpRequestId, valor, doador } = Item;
-      res.json({ helpId, helpRequestId, valor, doador });
+      res.header({'Access-Control-Allow-Origin' : '*'}).json({ helpId, helpRequestId, valor, doador });
     } else {
       res
         .status(404)
@@ -283,16 +303,21 @@ app.post("/helpdone", async (req, res) => {
   try {
     const command = new PutCommand(params);
     await docClient.send(command);
-    res.json({ helpId, helpRequestId, valor, doador });
+    res.header({'Access-Control-Allow-Origin' : '*'}).json({ helpId, helpRequestId, valor, doador });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not create help" });
   }
 });
 
+//S3
+app.use( async (req,res)=>{
+
+})
+
 //Any other
 app.use((req, res, next) => {
-  return res.status(404).json({
+  return res.header({'Access-Control-Allow-Origin' : '*'}).status(404).json({
     error: "Not Found",
   });
 });

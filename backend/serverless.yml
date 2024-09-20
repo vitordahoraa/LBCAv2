@@ -65,6 +65,11 @@ functions:
           cors: true
           
       - http: 
+          path: "helprequest"
+          method : GET
+          cors: true
+          
+      - http: 
           path: "helprequest/filter/titulo/{titulo}"
           method : GET
           cors: true

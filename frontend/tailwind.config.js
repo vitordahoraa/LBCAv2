@@ -13,9 +13,11 @@ module.exports = {
     },
     extend: {
       colors:{
-        neutral400 : '#b0b0b0',
+        lightGreyBg : "##F9FAFB",
+        neutral100 : '#e7e7e7',
+        neutral300 : '#b0b0b0',
         neutral400 : '#888888',
-        neutral600 : '#5d5d5d',
+        neutral500 : '#5d5d5d',
         neutral600 : '#4f4f4f',
         neutral800 : '#454545',
         neutral900 : '#3d3d3d',

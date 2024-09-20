@@ -41,14 +41,16 @@ export class RegisterComponent implements OnInit{
     
 }
   onSignIn(res : any){
-    this._userService.auth(res.credential).subscribe(
-      res => {
+    this._userService.googleAuth(res.credential).subscribe({
+      next : res => {
+        this._userService.storeUser(res)
         this.ngzone.run( ()=>this.router.navigate(['/home'])) 
     },
-      (err) => {
-        window.alert('Erro ao logar via Google')
-        console.log(err)
-        return false;
+      error : err => {
+          window.alert('Erro ao logar via Google')
+          console.log(err)
+          return false;
+    }
   })
     
   }
@@ -71,7 +73,50 @@ export class RegisterComponent implements OnInit{
 
   submitUser() {
     //TODO
-    console.log(this.applyForm.value.senha??'')
+    const name = this.applyForm.value.name
+    const telefone = this.applyForm.value.telefone
+    const email = this.applyForm.value.email
+    const senha = this.applyForm.value.senha
+    const data_nascimento = this.applyForm.value.data_nascimento
+
+    if(name == ''){
+      window.alert('Nome vazio')
+    } else if(telefone == ''){
+      window.alert('Telefone vazio')
+    } else if(email == ''){
+      window.alert('email vazio')
+    } else if(data_nascimento == ''){
+      window.alert('Data nascimento vazia')
+    } else if(senha == ''){
+      window.alert('Senha vazia')
+    } 
+    else{ 
+      
+      if(!/^(^[a-zA-Z0-9]{1,8}$)$/.test(String(senha)))
+        window.alert('Senha não segue o padrão')
+      else{
+        const userForm = {
+          userId : btoa(String(email)),
+          name : name,
+          telefone : telefone,
+          email : email,
+          data_nascimento : data_nascimento,
+          senha : senha
+        }
+        this._userService.auth(userForm).subscribe({
+          next : res => {
+            this._userService.storeUser(res)
+            this.ngzone.run( ()=>this.router.navigate(['/home'])) 
+        },
+        error : err => {
+            window.alert('Erro ao logar')
+            console.log(err)
+            return false;
+        }
+      })
+
+      }
+    }
   }
 
 

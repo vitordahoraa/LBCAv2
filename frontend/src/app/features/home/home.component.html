@@ -37,7 +37,7 @@
                 <h2 class="mt-5 font-light text-2xl w-[30rem] text-neutral800">Os helpinho podem parecer pequenos, mas juntos fazem a <span class="font-bold text-primary600"> diferença na vida de todos</span></h2>
                 <div class="flex mt-5">
                     
-                    <a href="" class="h-12 pt-3 font-inter font-semibold text-sm text-center text-white w-40 bg-primary500 rounded-2xl">Registre-se Grátis</a>
+                    <a routerLink="/register" routerLinkActive="active" class="h-12 pt-3 font-inter font-semibold text-sm text-center text-white w-40 bg-primary500 rounded-2xl">Registre-se Grátis</a>
                 </div>
             </div> 
             <!-- Images -->
@@ -78,4 +78,26 @@
             </div>
         </div>
     </div>
+    
+    <div class="container flex space-x-12 w-full h-20 mx-auto mt-20">
+        <div class="flex space-x-2 h-10 w-3/5 border-2 border-neutral500 rounded-md p-1">
+            <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5 18.4722L13.875 14.8472M15.8333 10.1388C15.8333 13.8207 12.8486 16.8055 9.16667 16.8055C5.48477 16.8055 2.5 13.8207 2.5 10.1388C2.5 6.45694 5.48477 3.47217 9.16667 3.47217C12.8486 3.47217 15.8333 6.45694 15.8333 10.1388Z" stroke="#6D6D6D" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input [(ngModel)] = "filter" (keyup.enter)="onEnter()" placeholder="Pesquise pelo título de um helpinho" type="text" class="text-neutral500 w-full text-md text-inter">
+                
+        </div>
+        @if(CurrentUser() != null){
+            <a routerLink="/new-item" routerLinkActive="active" class="h-10 pt-2 font-inter font-semibold text-sm text-center text-white w-40 bg-primary500 rounded-md">Criar novo helpinho</a>
+        }
+        
+    </div>
+    
+    <div class="mx-auto mb-12 w-4/5 grid grid-cols-4 gap-x-24">
+        @for(card of cards; track card.helpId){
+            <app-item-card [autor] = "card.solicitante" [categoria]="card.categoria" [titulo] = "card.titulo" [descricao] = "card.descricao" [imagem] = "card.imagem" [meta] = "card.meta" ></app-item-card>
+        }
+    </div> 
+    
+
 </div>
